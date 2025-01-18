@@ -1,72 +1,81 @@
-// ==================== INTRODUCTION TO GO ====================
-// Go is a statically-typed, compiled language created by Google.
-// Unlike Python's interpreter, Go code is compiled directly to machine code.
-// This makes it typically faster than Python but requires explicit type declarations.
+// =================== GO PROGRAMMING TUTORIAL ===================
+// This tutorial will teach you Go by comparing it with Python concepts
+// We'll build a book management system while learning core Go concepts
 
-// ==================== PACKAGE DECLARATION ====================
+// ------------------- PACKAGE DECLARATION ---------------------
 // Every Go file must start with a package declaration
-// 'package main' is special - it indicates this is an executable program, not a library
+// 'main' is a special package name - it tells Go this is an executable program
+// If this was a library, we might name it something like 'bookstore'
 package main
 
-// ==================== IMPORTS ====================
-// Go's import system is different from Python's
-// - In Python: 'import random'
-// - In Go: we use the full import path and group imports in parentheses
+// ------------------- IMPORTS -------------------------------
+// Go uses explicit imports for each package needed
+// Unlike Python, you can't use a package without importing it
+// The import syntax uses quotes, different from Python's plain imports
 import (
-	// fmt is Go's standard package for formatted I/O (similar to Python's print())
+	// fmt is Go's standard package for formatted I/O operations
+	// similar to Python's print() and string formatting
 	"fmt"
-	// math/rand is for random number generation (similar to Python's random module)
+
+	// math/rand is for random number generation
+	// notice how sub-packages use "/" unlike Python's "."
 	"math/rand"
-	// time is needed for random seed initialization
-	"time"
 )
 
-// ==================== INTERFACE DEFINITION ====================
-// In Python, we used ABC (Abstract Base Class) for PricedItem
-// In Go, we use interfaces instead. Key differences:
-// 1. Interfaces only declare method signatures
-// 2. Types implicitly implement interfaces (no explicit declaration needed)
-// 3. Interfaces are typically smaller in Go (following interface segregation principle)
+// ------------------- INTERFACES ---------------------------
+// Interfaces in Go are fundamentally different from Python's ABC
+// 1. They only declare method signatures (no implementations)
+// 2. They are implemented implicitly (no "implements" keyword needed)
+// 3. They are typically small, often just 1-2 methods
+// 4. They are satisfied by any type that implements all their methods
 type PricedItem interface {
-    // Method declarations include parameter types and return types
-    // float64 is Go's double-precision floating-point type (similar to Python's float)
-    GetPrice() float64
-    
-    // Go methods can return multiple values
-    // Here we return both float64 and error (Go's error handling mechanism)
-    SetPrice(float64) error
-    
-    // Multiple return values are grouped in parentheses
-    CalculateDiscount(float64) (float64, error)
+    // Method declarations show:
+    // - Name of method
+    // - Return type(s) after the parentheses
+    // - No function body (just declarations)
+    Price() float64
+    SetPrice(price float64) error
+    CalculateDiscount(percentage float64) (float64, error)
 }
 
-// ==================== STRUCT DEFINITION ====================
-// Instead of Python classes, Go uses structs
-// Structs are collections of fields (similar to class attributes)
+// ------------------- STRUCTS -----------------------------
+// Structs are Go's way of defining custom data types
+// Unlike Python classes:
+// 1. No inheritance (Go favors composition over inheritance)
+// 2. No constructor method
+// 3. No instance methods inside the struct definition
+// 4. Fields must have explicit types
 type Book struct {
-    // Field naming conventions in Go:
-    // - lowercase first letter = private (package-level visibility)
-    // - uppercase first letter = public (exported, visible outside package)
-    title      string   // private, like Python's self._title
-    author     string   // private, like Python's self._author
-    price      float64  // private, like Python's self._price
-    pageCount  int      // private, like Python's self._page_count
-    Seller     string   // public, like Python's self.seller
+    // Go's field visibility is controlled by capitalization:
+    // lowercase = private (package-level)
+    // uppercase = public (exported)
+    title      string  // private, like Python's _title
+    author     string  // private, like Python's _author
+    price      float64 // private, like Python's _price
+    pageCount  int     // private, like Python's _page_count
+    Seller     string  // public, like Python's seller (no underscore)
 }
 
-// ==================== CONSTANTS ====================
-// Constants in Go are declared using the const keyword
-// Unlike Python's class-level constants, these are package-level
+// ------------------- CONSTANTS ---------------------------
+// Constants in Go are declared at package level
+// Unlike Python, Go has true constants that cannot be changed
+// Naming convention: Use MixedCaps or ALL_CAPS for constants
 const CategoryCode = "BOOK"
 
-// ==================== CONSTRUCTOR ====================
+// ------------------- CONSTRUCTORS ------------------------
 // Go doesn't have built-in constructors like Python's __init__
 // Instead, we use factory functions, typically prefixed with "New"
-// The * before Book means this returns a pointer to a Book
-func NewBook(title string, author string, price float64, seller string) *Book {
-    // The & operator creates a pointer to a new struct instance
+// This is a common Go pattern for object creation
+func NewBook(title, author string, price float64, seller string) *Book {
+    // The * before Book means this returns a pointer
+    // Pointers are a core Go concept with no Python equivalent
+    // They hold the memory address of values
+    
+    // Return a new Book instance
+    // The & operator creates a pointer to the struct
     return &Book{
-        // In struct initialization, we assign values to fields
+        // Field initialization uses name: value syntax
+        // Similar to Python's kwargs but with colons
         title:     title,
         author:    author,
         price:     price,
@@ -75,58 +84,72 @@ func NewBook(title string, author string, price float64, seller string) *Book {
     }
 }
 
-// ==================== METHODS ====================
-// Go methods have a "receiver" parameter in parentheses before the method name
-// This is similar to Python's self parameter
-// (b *Book) means this method operates on a pointer to a Book
+// ------------------- METHODS -----------------------------
+// Go methods are declared outside the struct
+// The (b *Book) is called a "receiver" - it's like Python's self
+// But in Go, we explicitly say if we're using a pointer (*Book)
+// or value (Book) receiver
 func (b *Book) Summary() string {
-    // fmt.Sprintf is similar to Python's f-strings
+    // fmt.Sprintf is like Python's f-strings
+    // %.2f formats float with 2 decimal places
     return fmt.Sprintf("%s by %s - $%.2f", b.title, b.author, b.price)
 }
 
-// Implementation of PricedItem interface methods
-// Note: Go automatically knows this implements PricedItem because it has all required methods
-func (b *Book) GetPrice() float64 {
+// Interface implementation for Book
+// Notice how we don't need to explicitly state that we're
+// implementing PricedItem - Go does this implicitly
+func (b *Book) Price() float64 {
     return b.price
 }
 
-// ==================== ERROR HANDLING ====================
-// Go doesn't use exceptions like Python
-// Instead, functions return error values that must be checked
+// ------------------- ERROR HANDLING ----------------------
+// Go handles errors very differently from Python:
+// 1. No try/except blocks
+// 2. Errors are return values, not exceptions
+// 3. Multiple return values are common (value, error)
 func (b *Book) SetPrice(price float64) error {
+    // Error checking is explicit
     if price < 0 {
         // fmt.Errorf creates a new error with formatted text
         return fmt.Errorf("price cannot be negative")
     }
     b.price = price
-    // nil is Go's version of None/null
+    // nil is Go's equivalent of None
     return nil
 }
 
 func (b *Book) CalculateDiscount(percentage float64) (float64, error) {
+    // Multiple return values are idiomatic in Go
+    // This is different from Python's single return value
     if percentage < 0 || percentage > 100 {
         return 0, fmt.Errorf("percentage must be between 0 and 100")
     }
     return b.price * (1 - percentage/100), nil
 }
 
-// ==================== UTILITY FUNCTIONS ====================
-// Regular functions (not methods) don't have a receiver parameter
+// ------------------- HELPER FUNCTIONS --------------------
+// Package-level functions (not methods) don't have receivers
+// They're like Python's module-level functions
+func GetCategoryCode() string {
+    return CategoryCode
+}
+
+// Private helper function (lowercase name)
 func randomPageCount() int {
-    // rand.Intn(n) generates numbers from 0 to n-1
-    // We add 100 to get a range of 100-1000
+    // rand.Intn(n) generates 0 to n-1
+    // Adding 100 gives us 100 to 1000
     return rand.Intn(901) + 100
 }
 
-// ==================== MAGAZINE IMPLEMENTATION ====================
-// Another struct implementing the same interface
-// This demonstrates Go's interface polymorphism
+// ------------------- MULTIPLE TYPES ---------------------
+// Go encourages small, focused types that satisfy interfaces
 type Magazine struct {
     name        string
     price       float64
     issueNumber int
 }
 
+// Constructor for Magazine
 func NewMagazine(name string, price float64, issueNumber int) *Magazine {
     return &Magazine{
         name:        name,
@@ -135,8 +158,8 @@ func NewMagazine(name string, price float64, issueNumber int) *Magazine {
     }
 }
 
-// Magazine's implementation of PricedItem interface
-func (m *Magazine) GetPrice() float64 {
+// Magazine methods implementing PricedItem interface
+func (m *Magazine) Price() float64 {
     return m.price
 }
 
@@ -153,156 +176,214 @@ func (m *Magazine) CalculateDiscount(percentage float64) (float64, error) {
         return 0, fmt.Errorf("percentage must be between 0 and 100")
     }
     baseDiscount := m.price * (1 - percentage/100)
-    // Additional 10% off for magazines over $10
     if m.price > 10 {
         return baseDiscount * 0.9, nil
     }
     return baseDiscount, nil
 }
 
-// ==================== INTERFACE USAGE ====================
-// This function demonstrates Go's interface polymorphism
-// It can accept any type that implements PricedItem
+// ------------------- INTERFACE USAGE -------------------
+// This function demonstrates polymorphism in Go
+// It accepts any type that implements PricedItem
 func printItemPriceInfo(item PricedItem) {
-    // Get the original price
-    price := item.GetPrice()
+    // Direct price access through interface method
+    fmt.Printf("Original price: $%.2f\n", item.Price())
     
-    // Calculate discount, checking for errors
-    // The := operator is a shorthand for declaring and initializing variables
+    // Error handling in Go is explicit and required
     discounted, err := item.CalculateDiscount(20)
-    
-    // Error handling in Go is explicit
+    // if err != nil is the most common error check in Go
     if err != nil {
         fmt.Printf("Error calculating discount: %v\n", err)
         return
     }
-    
-    // Printf is similar to Python's formatted strings
-    // Note the %% to print a literal % symbol
-    fmt.Printf("Original price: $%.2f\n", price)
     fmt.Printf("Price with 20%% discount: $%.2f\n", discounted)
 }
 
-// ==================== ADDITIONAL BOOK METHODS ====================
-// GetCategoryCode is similar to Python's class method
-// In Go, we just use a regular function since we don't need
-// class-level functionality like Python's @classmethod
-func GetCategoryCode() string {
-    return CategoryCode
-}
-
-// GetPageCount is similar to Python's @property decorator
-// In Go, we use regular methods for property-like access
-func (b *Book) GetPageCount() int {
-    return b.pageCount
-}
-
-// SetPageCount is similar to Python's @property.setter
-func (b *Book) SetPageCount(value int) {
-    b.pageCount = value
-}
-
-// ==================== MAIN FUNCTION ====================
-// The main() function is the entry point of the program
-// Similar to Python's if __name__ == "__main__":
+// ------------------- MAIN FUNCTION ---------------------
+// main() is the entry point of a Go program
+// Like Python's if __name__ == "__main__":
 func main() {
-    // Initialize random seed for random number generation
-    // This is similar to Python's random.seed()
-    rand.Seed(time.Now().UnixNano())
-
-    // Create a new book instance
-    // := is used for declaring and initializing variables in one line
+    // := is a shorthand declaration operator
+    // It declares and initializes variables in one step
     harryPotter := NewBook("Harry Potter", "J.K. Rowling", 10.99, "Flourish & Blotts")
 
-    // Demonstrate various operations
+    // Calling methods uses dot notation like Python
     fmt.Println(harryPotter.Summary())
 
-    // Accessing public fields (notice the capital letter)
+    // Public fields can be accessed directly
     fmt.Println("Original Seller:", harryPotter.Seller)
     harryPotter.Seller = "Obscurus Books"
     fmt.Println("New Seller:", harryPotter.Seller)
 
-    // Error handling example
-    // In Go, we must check errors explicitly
+    // Error handling pattern in Go:
+    // 1. Call function that returns error
+    // 2. Check if error is nil
+    // 3. Handle error if present
     if err := harryPotter.SetPrice(12.99); err != nil {
         fmt.Println("Error:", err)
     }
 
     fmt.Println(harryPotter.Summary())
+    fmt.Println("Price:", harryPotter.Price())
+    fmt.Println("Category Code:", GetCategoryCode())
 
-    // Create a magazine instance
+    // Creating a magazine instance
     vogue := NewMagazine("Vogue", 12.99, 123)
 
-    // Demonstrate interface usage with both types
     fmt.Println("\n=== Demonstrating interface behavior ===")
     fmt.Println("Book pricing:")
     printItemPriceInfo(harryPotter)
 
     fmt.Println("\nMagazine pricing:")
     printItemPriceInfo(vogue)
-
-    // Additional demonstrations to match Python output
-    fmt.Printf("Price: %.2f\n", harryPotter.GetPrice())
-    fmt.Printf("Category Code: %s\n", GetCategoryCode())
-    
-    // Demonstrate page count operations
-    fmt.Printf("Page Count: %d\n", harryPotter.GetPageCount())
-    harryPotter.SetPageCount(500)
-    fmt.Printf("Updated Page Count: %d\n", harryPotter.GetPageCount())
-
-    // Note: Go doesn't have direct equivalent to Python's property deleter
-    // Memory management is handled differently in Go
-
-    // ==================== EXPECTED OUTPUT EXPLANATION ====================
-    /*
-    Expected Output:
-    Harry Potter by J.K. Rowling - $10.99        // From harryPotter.Summary()
-    Original Seller: Flourish & Blotts           // Direct access to public Seller field
-    New Seller: Obscurus Books                   // After modifying Seller field
-    Harry Potter by J.K. Rowling - $12.99        // After SetPrice(12.99)
-
-    === Demonstrating interface behavior ===
-    Book pricing:                                // From printItemPriceInfo(harryPotter)
-    Original price: $12.99                       // From GetPrice()
-    Price with 20% discount: $10.39              // From CalculateDiscount(20)
-
-    Magazine pricing:                            // From printItemPriceInfo(vogue)
-    Original price: $12.99                       // From GetPrice()
-    Price with 20% discount: $9.35               // From CalculateDiscount(20) with extra 10% off
-    Price: 12.99                                 // Direct GetPrice() call
-    Category Code: BOOK                          // From GetCategoryCode()
-    Page Count: 418                              // From GetPageCount() (random value)
-    Updated Page Count: 500                      // After SetPageCount(500)
-    */
-
-    // ==================== OUTPUT BREAKDOWN ====================
-    // 1. Initial output shows the book's creation and basic string representation
-    // 2. Seller modification demonstrates public field access
-    // 3. Price update shows the effect of SetPrice method
-    // 4. Interface behavior shows how both Book and Magazine implement PricedItem
-    // 5. Magazine's special discount (additional 10% off) is visible in its output
-    // 6. Final section shows property-like access to various fields
-
-    // Note: The random page count (418 in example) will vary in each run
-    // because it's generated using randomPageCount()
 }
 
-// ==================== KEY DIFFERENCES FROM PYTHON ====================
-// 1. Explicit type declarations
-// 2. Pointers and memory management
-// 3. Error handling instead of exceptions
-// 4. Public/private determined by capitalization
-// 5. Interfaces instead of abstract classes
-// 6. No inheritance (composition over inheritance)
-// 7. No decorators or properties
-// 8. Compiled vs interpreted
-// 9. Strict formatting rules (enforced by go fmt)
-// 10. Built-in concurrency support (not shown in this example)
+/* ------------------- EXAMPLE OUTPUT -------------------
 
-// ==================== IMPORTANT NOTE ====================
-// Some Python features don't have direct equivalents in Go:
-// 1. Property decorators (@property) - Use methods instead
-// 2. Deleters - Go uses garbage collection
-// 3. Class methods (@classmethod) - Use package-level functions
-// 4. Static methods (@staticmethod) - Use package-level functions
-// 5. Dynamic attribute deletion - Not available in Go
+Running this program will produce output similar to:
+
+Harry Potter by J.K. Rowling - $10.99
+Original Seller: Flourish & Blotts
+New Seller: Obscurus Books
+Harry Potter by J.K. Rowling - $12.99
+Price: 12.99
+Category Code: BOOK
+
+=== Demonstrating interface behavior ===
+Book pricing:
+Original price: $12.99
+Price with 20% discount: $10.39
+
+Magazine pricing:
+Original price: $12.99
+Price with 20% discount: $9.35
+
+Note: The page count will be random each time you run the program.
+
+------------------- ADDITIONAL GO CONCEPTS -------------------
+
+1. GOROUTINES AND CONCURRENCY
+   - Go has built-in concurrency support using goroutines
+   - Much simpler than Python's threading/multiprocessing
+   - Use 'go' keyword to start a goroutine
+   - Channels for communication between goroutines
+
+2. DEFER STATEMENT
+   - defer delays execution until surrounding function returns
+   - Commonly used for cleanup operations
+   - Similar to Python's context managers but more flexible
+
+3. SLICES AND ARRAYS
+   - Arrays have fixed size
+   - Slices are dynamic (like Python lists)
+   - Powerful slice operations with memory efficiency
+
+4. MAPS
+   - Similar to Python dictionaries
+   - Must specify key and value types
+   - Written as map[KeyType]ValueType
+
+5. ZERO VALUES
+   - Every type has a zero value
+   - numbers: 0
+   - strings: ""
+   - pointers: nil
+   - etc.
+
+6. BUILD SYSTEM
+   - go build: compiles packages
+   - go run: compiles and runs
+   - go test: runs tests
+   - go mod: manages dependencies
+
+7. TESTING
+   - Built-in testing framework
+   - Files end in _test.go
+   - Run with 'go test'
+
+8. DOCUMENTATION
+   - Documentation comments start with //
+   - godoc generates documentation
+   - View with 'go doc'
+
+9. FORMATTING
+   - gofmt automatically formats code
+   - No debates about style
+   - Run with 'go fmt'
+
+10. MODULES
+    - go.mod defines module
+    - Similar to Python's requirements.txt
+    - But more integrated with language
+
+------------------- COMMON GO PATTERNS -------------------
+
+1. ERROR HANDLING
+   if err != nil {
+       return nil, err
+   }
+
+2. BUILDER PATTERN
+   options := NewOptions().
+       WithName("name").
+       WithAge(25)
+
+3. FUNCTIONAL OPTIONS
+   func WithTimeout(t time.Duration) Option {
+       return func(o *Options) {
+           o.timeout = t
+       }
+   }
+
+4. INTERFACE COMPOSITION
+   type Reader interface {
+       Read(p []byte) (n int, err error)
+   }
+
+5. EMBEDDING
+   type Client struct {
+       *http.Client
+   }
+
+------------------- GO VS PYTHON SUMMARY -------------------
+
+1. TYPING
+   Python: Dynamic typing
+   Go: Static typing
+
+2. CONCURRENCY
+   Python: GIL, multiprocessing
+   Go: Goroutines, channels
+
+3. ERROR HANDLING
+   Python: try/except
+   Go: explicit error returns
+
+4. OBJECTS
+   Python: Classes with inheritance
+   Go: Structs with composition
+
+5. INTERFACES
+   Python: Explicit ABC
+   Go: Implicit satisfaction
+
+6. PACKAGING
+   Python: pip, virtualenv
+   Go: go modules
+
+7. FORMATTING
+   Python: PEP 8 (convention)
+   Go: gofmt (enforced)
+
+8. VISIBILITY
+   Python: _underscore convention
+   Go: Capitalization rules
+
+9. GENERICS
+   Python: Built-in
+   Go: Added in Go 1.18+
+
+10. PHILOSOPHY
+    Python: "There should be one obvious way to do it"
+    Go: "Keep it simple and straightforward"
+*/

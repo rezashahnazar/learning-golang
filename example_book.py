@@ -2,13 +2,21 @@ from abc import ABC, abstractmethod
 import random
 
 
-# Add this interface-like abstract class
 class PricedItem(ABC):
     """
     Abstract base class representing items that have a price.
-    This demonstrates a concept similar to Go interfaces.
-    In Go, interfaces are implicit - any type that implements
-    the required methods automatically satisfies the interface.
+
+    This class demonstrates Python's approach to interfaces using abstract base classes (ABC).
+    Key differences from Go interfaces:
+    1. Python uses explicit abstract base classes with @abstractmethod decorators
+    2. Go interfaces are implicit - types automatically implement interfaces by having matching methods
+    3. Python requires explicit inheritance (class Book(PricedItem)), while Go doesn't
+    4. Python's ABC provides compile-time type checking and runtime enforcement
+
+    All implementing classes must define:
+    - get_price(): Retrieves the current price
+    - set_price(): Updates the price with validation
+    - calculate_discount(): Computes discounted prices with custom logic
     """
 
     @abstractmethod
@@ -27,7 +35,6 @@ class PricedItem(ABC):
         pass
 
 
-# Modify the Book class to implement the interface
 class Book(PricedItem):
     # Class-level constant representing the category code for all books
     CATEGORY_CODE = "BOOK"
@@ -35,11 +42,24 @@ class Book(PricedItem):
     def __init__(self, title, author, price, seller=None):
         """
         Initialize a new Book instance.
+
+        This constructor demonstrates Python's approach to object attributes:
+        1. Protected attributes (_title, _author, _price) using single underscore
+           - Not truly private, but indicates "internal use" by convention
+           - Similar to unexported fields in Go (lowercase first letter)
+
+        2. Public attributes (seller) with no underscore
+           - Directly accessible, similar to exported fields in Go (uppercase first letter)
+
+        3. Dynamic attribute creation (_page_count)
+           - Shows Python's flexible object model
+           - Different from Go's strict struct definition
+
         Args:
             title (str): The title of the book
             author (str): The author's name
-            price (float): The book's price
-            seller (str): The seller's name (public attribute, can be modified directly)
+            price (float): The book's price (must be non-negative)
+            seller (str, optional): The seller's name. Defaults to None.
         """
         self._title = title
         self._author = author
@@ -99,6 +119,12 @@ class Book(PricedItem):
     def page_count(self):
         """
         Property getter for page count.
+
+        Demonstrates Python's property decorator system:
+        1. @property creates a getter method that's accessed like an attribute
+        2. Different from Go, which uses explicit GetPageCount() methods
+        3. Provides encapsulation while maintaining clean syntax
+
         Returns:
             int: The current page count
         """
@@ -138,8 +164,17 @@ class Book(PricedItem):
 # Add another class that implements the same interface
 class Magazine(PricedItem):
     """
-    Magazine class implementing the same PricedItem interface.
-    This demonstrates how different types can implement the same interface.
+    Magazine class implementing the PricedItem interface.
+
+    Demonstrates:
+    1. Interface implementation: Shows how different types can satisfy same interface
+    2. Method overriding: Custom discount calculation logic
+    3. Polymorphic behavior: Can be used anywhere PricedItem is expected
+
+    Compare with Go:
+    - Go would implicitly implement the interface by matching method signatures
+    - Python requires explicit inheritance from PricedItem
+    - Both approaches achieve similar polymorphic behavior
     """
 
     def __init__(self, name: str, price: float, issue_number: int):
@@ -170,8 +205,20 @@ class Magazine(PricedItem):
 def print_item_price_info(item: PricedItem):
     """
     Function demonstrating interface-like behavior.
-    This is similar to how Go interfaces work - we can pass
-    any object that implements the PricedItem interface.
+
+    Key concepts demonstrated:
+    1. Duck typing: Python accepts any object implementing required methods
+    2. Type hints: PricedItem annotation provides IDE support and documentation
+    3. Polymorphism: Different classes (Book/Magazine) handled uniformly
+    4. Interface segregation: Only required methods are defined in PricedItem
+
+    Compare with Go:
+    - Go: func printItemPriceInfo(item PricedItem)
+    - Both languages allow any type implementing the interface
+    - Go enforces this at compile-time, Python at runtime
+
+    Args:
+        item (PricedItem): Any object implementing the PricedItem interface
     """
     print(f"Original price: ${item.get_price():.2f}")
     print(f"Price with 20% discount: ${item.calculate_discount(20):.2f}")
@@ -251,7 +298,7 @@ New Seller: Obscurus Books
 Harry Potter by J.K. Rowling - $12.99
 Price: 12.99
 Category Code: BOOK
-Page Count: 307
+Page Count: 437
 Updated Page Count: 500
 Error: 'Book' object has no attribute '_page_count'
 
