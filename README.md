@@ -1,89 +1,93 @@
-# Go Programming Tutorial: From Python to Go
+# Go vs Python Tutorial: Learning Go for Python Developers
 
-This tutorial demonstrates the transition from Python to Go programming, highlighting key differences and similarities between the two languages.
+This tutorial helps Python developers learn Go by comparing common patterns and implementations between the two languages.
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Project Setup](#project-setup)
-- [Basic Concepts](#basic-concepts)
-- [Structs vs Classes](#structs-vs-classes)
-- [Methods and Functions](#methods-and-functions)
+- [Basic Setup](#basic-setup)
+- [Type System](#type-system)
+- [Classes vs Structs](#classes-vs-structs)
+- [Constructors](#constructors)
+- [Methods and Receivers](#methods-and-receivers)
 - [Error Handling](#error-handling)
-- [Memory Management](#memory-management)
+- [Constants and Static Members](#constants-and-static-members)
 
-## Installation
+## Basic Setup
 
-1. Download Go from [golang.org](https://golang.org/dl/)
-2. Verify installation:
+### Python Setup
+
+```python
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+### Go Setup
 
 ```bash
-go version
+# Initialize a new Go module
+go mod init your-project-name
 ```
 
-## Project Setup
+## Type System
 
-1. Create a new Go module:
+Go is statically typed, while Python is dynamically typed. Let's see the difference:
 
-```bash
-go mod init learn-golang
+### Python
+
+```python
+# Dynamic typing
+x = 42        # type is inferred
+x = "hello"   # can change type
 ```
 
-2. Your project structure should look like:
+### Go
 
-```
-learn-golang/
-├── go.mod
-├── main.go
-└── README.md
-```
-
-## Basic Concepts
-
-### Key Differences from Python
-
-1. **Static Typing**: Go requires explicit type declarations
-2. **Package System**: Every Go file must belong to a package
-3. **No Classes**: Go uses structs and methods instead
-4. **Error Handling**: Go uses explicit error returns instead of exceptions
-5. **Exported Names**: Capitalization determines visibility
-
-### Example Comparison
-
-Let's look at how a simple Book implementation differs between Python and Go:
-
-Python Version (reference from example_book.py):
-
-```python:example_book.py
-startLine: 4
-endLine: 20
+```go
+// Static typing
+var x int = 42
+// x = "hello"  // This would cause a compilation error
 ```
 
-Go Version (reference from main.go):
+## Classes vs Structs
 
-```go:main.go
-startLine: 24
-endLine: 31
+Python uses classes while Go uses structs. Let's compare the basic structure:
+
+### Python Implementation
+
+```python
+class Book:
+    def __init__(self, title, author, price):
+        self._title = title
+        self._author = author
+        self._price = price
 ```
 
-## Structs vs Classes
-
-### Defining Types
-
-In Go, we use structs instead of classes. Here's how to create a new Book:
+### Go Implementation
 
 ```go
 type Book struct {
-    title     string
-    author    string
-    price     float64
-    pageCount int
+    title  string
+    author string
+    price  float64
 }
 ```
 
-### Constructors
+## Constructors
 
-Python uses `__init__`, while Go uses constructor functions:
+Python uses `__init__` while Go uses constructor functions by convention:
+
+### Python Constructor
+
+```python
+def __init__(self, title, author, price):
+    self._title = title
+    self._author = author
+    self._price = price
+    self._page_count = self.random_page_count()
+```
+
+### Go Constructor
 
 ```go
 func NewBook(title string, author string, price float64) *Book {
@@ -91,34 +95,41 @@ func NewBook(title string, author string, price float64) *Book {
         title:     title,
         author:    author,
         price:     price,
-        pageCount: rand.Intn(1000), // Example random page count
+        pageCount: randomPageCount(),
     }
 }
 ```
 
-## Methods and Functions
+## Methods and Receivers
 
-### Method Definition
+### Python Methods
 
-In Go, methods are defined with a receiver parameter:
+```python
+def summary(self):
+    return f"{self._title} by {self._author} - ${self._price:.2f}"
+
+@property
+def price(self):
+    return self._price
+
+@price.setter
+def price(self, value):
+    if value < 0:
+        raise ValueError("price cannot be negative")
+    self._price = value
+```
+
+### Go Methods
 
 ```go
 func (b *Book) Summary() string {
     return fmt.Sprintf("%s by %s - $%.2f", b.title, b.author, b.price)
 }
-```
 
-### Getters and Setters
-
-While Python uses properties, Go uses explicit methods:
-
-```go
-// Getter
 func (b *Book) GetPrice() float64 {
     return b.price
 }
 
-// Setter
 func (b *Book) SetPrice(price float64) error {
     if price < 0 {
         return fmt.Errorf("price cannot be negative")
@@ -130,7 +141,16 @@ func (b *Book) SetPrice(price float64) error {
 
 ## Error Handling
 
-Go uses explicit error returns instead of exceptions:
+### Python Error Handling
+
+```python
+def set_price(self, price):
+    if price < 0:
+        raise ValueError("price cannot be negative")
+    self._price = price
+```
+
+### Go Error Handling
 
 ```go
 func (b *Book) SetPrice(price float64) error {
@@ -141,44 +161,69 @@ func (b *Book) SetPrice(price float64) error {
     return nil
 }
 
-// Usage
+// Usage:
 if err := book.SetPrice(-10); err != nil {
     fmt.Println("Error:", err)
 }
 ```
 
-## Memory Management
+## Constants and Static Members
 
-- Go uses garbage collection
-- Pointers are common but simpler than in C/C++
-- The `&` operator creates a pointer
-- The `*` operator dereferences a pointer
+### Python Constants
 
-## Running the Code
+```python
+class Book:
+    CATEGORY_CODE = "BOOK"  # Class-level constant
 
-Execute your Go program:
-
-```bash
-go run main.go
+    @classmethod
+    def get_category_code(cls):
+        return cls.CATEGORY_CODE
 ```
 
-## Best Practices
+### Go Constants
 
-1. Use meaningful variable names
-2. Follow Go's official style guide
-3. Use proper error handling
-4. Capitalize exported names
-5. Use comments for package documentation
+```go
+const CategoryCode = "BOOK"
 
-## Resources
+func GetCategoryCode() string {
+    return CategoryCode
+}
+```
 
-- [Official Go Documentation](https://golang.org/doc/)
-- [Go by Example](https://gobyexample.com/)
-- [Effective Go](https://golang.org/doc/effective_go)
+## Key Differences
 
-## Author
+1. **Type System**
 
-Reza Shahnazar
+   - Python: Dynamic typing
+   - Go: Static typing with type inference
+
+2. **Object-Oriented Programming**
+
+   - Python: Class-based with inheritance
+   - Go: Struct-based with composition
+
+3. **Error Handling**
+
+   - Python: Exception-based
+   - Go: Explicit error returns
+
+4. **Access Modifiers**
+
+   - Python: Convention-based (\_prefix)
+   - Go: Capitalization-based (uppercase for exported)
+
+5. **Method Receivers**
+   - Python: Implicit self
+   - Go: Explicit receiver parameter
+
+## Practice Exercises
+
+1. Create a new struct/class for `Library` that contains a collection of books
+2. Implement methods to add/remove books
+3. Create a method to calculate the total value of all books
+4. Implement proper error handling for both languages
+
+For more examples and documentation, contact:
 
 - GitHub: [@rezashahnazar](https://github.com/rezashahnazar)
 - Email: reza.shahnazar@gmail.com
